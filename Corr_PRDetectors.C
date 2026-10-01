@@ -47,8 +47,8 @@ void Corr_PRDetectors(){
 
 //####### tchain adding #####
     TChain *tchnT = new TChain("T");
-//    tchnT->Add(Form("/lustre24/expphy/volatile/halla/sbs/saru/genrp_replayed_1125_500k_event*root"));
-      tchnT->Add(Form("/w/halla-scshelf2102/sbs/saru/Simu_GEnRP/genrp_agc_sim4.root"));
+   tchnT->Add(Form("/w/halla-scshelf2102/sbs/saru/g4sbs/install/run_g4sbs_here/genrp_test_Saru.root"));
+//      tchnT->Add(Form("/w/halla-scshelf2102/sbs/saru/Simu_GEnRP/genrp_agc_sim4.root"));
 
 
     cout<<"processing input files "<<endl;
@@ -243,12 +243,13 @@ for (int j= 0; j<*hodoPR_hit_nhits;j++){
 	double hodoPR_yg = hodoPR_hit_yhitg[j];
 	  // Plane 1
 //        if(plane == 1) {
+
 if(*ActAna_hit_nhits>0 && *HCal_hit_nhits>0 ){      
  if (fabs(*ev_W2 - 0.86) < 0.7 && Earm_BBPSTF1_det_esum[0] > 0.1){
-    if (*Earm_BBGEM_Track_ntracks >= 0 && ((Earm_BBPSTF1_det_esum[0] + Earm_BBSHTF1_det_esum[0]) / (*ev_ep)) > 0.1){  
+    if (*Earm_BBGEM_Track_ntracks >= 0 && ((Earm_BBPSTF1_det_esum[0] + Earm_BBSHTF1_det_esum[0]) / (*ev_ep)) > 0.1){ 
+    
 	h_deltahit_yg->Fill(GEMPR_hit_yg[i] - hodoPR_hit_yhitg[j]);
-	h_yg_GemHodo->Fill(gemhit_yg,hodoPR_yg);
-    }}}}}
+	h_yg_GemHodo->Fill(gemhit_yg,hodoPR_yg);}}}}}
 
 for (int i = 0; i<*GEMPR_hit_nhits; i++) {
 	int plane = GEMPR_hit_plane[i];
@@ -296,7 +297,7 @@ if(*ActAna_hit_nhits>0 && *HCal_hit_nhits>0 ){
     }}}}}
 
 }
-
+/*
 // Canvas for 1D histograms
 TCanvas *c1 = new TCanvas("c1","PR GEMs hit vs HodoPR hit",1200,600);
 c1->Divide(3,2);
@@ -390,7 +391,7 @@ h_zg_GemHodo->GetYaxis()->SetTitle("HodoPR z_{hitg} (m)");
 h_zg_GemHodo->GetXaxis()->CenterTitle();
 h_zg_GemHodo->GetYaxis()->CenterTitle();
 h_zg_GemHodo->Draw("COLZ");
-
+*/
 
 
 TCanvas *c3 = new TCanvas("c3","PR GEMs vs HodoPR Time COrrelation",800,400);

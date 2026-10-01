@@ -92,11 +92,14 @@ TTreeReaderArray<int> GEMPR_hit_pid(tree,"Harm.PRPolGEMFarSide.hit.pid");
 //HCal  and AA Hit_Timing Variables
 TTreeReaderValue<int> HCal_hit_nhits(tree, "Harm.HCalScint.hit.nhits");
 TTreeReaderArray<int> HCal_cell(tree, "Harm.HCalScint.hit.cell");
-TTreeReaderArray<double> HCal_t(tree, "Harm.HCalScint.hit.tavg");
+TTreeReaderArray<double> HCal_t(tree, "Harm.HCalScint.hit.tmin");
 TTreeReaderArray<double> HCal_esum(tree, "Harm.HCalScint.hit.sumedep");
 
-TTreeReaderValue<int> ActAna_hit_nhits(tree, "Harm.ActAnScint.hit.nhits");
-TTreeReaderArray<double> ActAna_hit_t(tree, "Harm.ActAnScint.hit.tavg");
+
+TTreeReaderArray<double> ActAna_esum(tree,"Harm.ActAnScint.hit.sumedep");
+TTreeReaderValue<int> ActAna_nhits(tree, "Harm.ActAnScint.hit.nhits");
+TTreeReaderArray<double> ActAna_t(tree, "Harm.ActAnScint.hit.tmin");
+TTreeReaderArray<int> ActAna_cell(tree, "Harm.ActAnScint.hit.cell");
 
 //BB Side hit timinig variables
 TTreeReaderArray<int>Earm_BBGEM_pid(tree,"Earm.BBGEM.hit.pid");
@@ -132,13 +135,16 @@ TTreeReaderArray<double>Earm_BBHodo_esum(tree,"Earm.BBHodoScint.hit.sumedep");
     TGaxis::SetMaxDigits(4);
     gROOT->ForceStyle(true);
 
-TH1D *h_TOF_BBSH = new TH1D("h_TOF_BBSH","BBHodo time-BBSH time;BBHodo time-BBSH time;counts",100,-20,20);
-TH2D *h_TOF_Corr_BBSH = new TH2D("h_TOF_Corr_BBSH","BBHodo time -BBSH time vs BBSH_Cell;BBSH_Cell;BBHodo time -BBSH time",181,0,181,200,-80.0,80.0);
+
 
 //TOF    1D plots
-TH1D *h_TOF = new TH1D("h_TOF","BBHodo time-hodoPR time;BBHodo time-hodoPR time;counts",100,-60,60);
-TH1D *h_TOF_BBHCal = new TH1D("h_TOF_BBHCal","HCal time -BBhodo_time;HCal Time- BBhodo Time;count",100,-50,50);
-TH1D *h_TOF_HodoHCal = new TH1D("h_TOF_HodoHCal","HCal Time- HodoPR Time;HCal Time-HodoPR Time;counts",100,-80,80);
+TH1D *h_TOF = new TH1D("h_TOF","BBHodo time-hodoPR time;BBHodo time-hodoPR time;counts",200,-100,100);
+TH1D *h_TOF_BBHCal = new TH1D("h_TOF_BBHCal","HCal time -BBhodo_time;HCal Time- BBhodo Time;count",200,-100,100);
+TH1D *h_TOF_HodoHCal = new TH1D("h_TOF_HodoHCal","HCal Time- HodoPR Time;HCal Time-HodoPR Time;counts",200,-100,100);
+TH1D *h_TOF_AA = new TH1D("h_TOF_AA","BBHodo time-AA time;BBHodo time-AA time;counts",200,-100,100);
+TH1D *h_TOF_AAHCal = new TH1D("h_TOF_AAHCal","AA time - HCal time;AA time-HCal time;counts",200,-100,100);
+TH1D *h_TOF_AAHodoPR = new TH1D("h_TOF_AAHodoPR","HodoPR time - AA time;HodoPR time - AA time;counts",200,-100,100);
+
 
 // TOF 2D plots
 TH2D *h_TOF_Corr = new TH2D("h_TOF_Corr","BBHodo time - hodoPR time vs HodoPR_Cell;HodoPR_Cell;BBHodo time - hodoPR time",28,-2,26,200,-100.0,100.0);
@@ -148,6 +154,10 @@ TProfile *ph_TOF_Corr_HCal = new TProfile( "ph_TOF_Corr_HCal","",300, 0, 295);
 TH2D *h_TOF_Hodo_HCal = new TH2D("h_TOF_Hodo_HCal","HodoPR time - hcaltime vs Hcal_Cell;HCal_Cell; Hcal Time - HodoPR Time",300,-5,295,200,-100.0,100.0);
 TH2D *h_TOF_HodoPR = new TH2D("h_TOF_HodoPR","Hcaltime - HodoPR time  vs HodoPR_Cell;HodoPR_Cell; Hcal time - HodoPR time",28,-2,26,200,-100.0,100.0);
 TProfile *ph_TOF_HodoPR = new TProfile( "ph_TOF_HodoPR","",28,-2, 26);
+TH2D *h_TOF_Corr_AA = new TH2D("h_TOF_Corr_AA","BBHodo time -AA time vs AA_Cell;BBSH_Cell;BBHodo time -AA time",35,-2,33,200,-100,100);
+TH2D *h_TOF_Corr_AAHCal = new TH2D("h_TOF_Corr_AAHCal","AA time - HCal time vs HCal_Cell;HCal_Cell;AA time - HCal time",300,-5,295,200,-100,100);
+TH2D *h_TOF_Corr_AAHodoPR = new TH2D("h_TOF_Corr_AAHodoPR","HodoPR time - AA time vs AA_Cell;AA_Cell;HodoPR time - AA time",35,-2,33,200,-100,100);
+
 
 
 int Nentries = tree.GetEntries();
@@ -242,6 +252,50 @@ for (int i = 0; i < *hodoPR_nhits; i++) {
  h_TOF_HodoPR->Fill(HodoPR_cell, diff);
  ph_TOF_HodoPR->Fill(HodoPR_cell,diff);
  }}}
+
+
+//BBhodo to AA
+for (int i = 0; i < *Earm_BBHodo_nhits; i++) {
+    double bb_t = Earm_BBHodo_t[i];
+    double BBHodo_esum =Earm_BBHodo_esum[i];
+     for (int j = 0; j < *ActAna_nhits; j++) {
+             double ActAna = ActAna_t[j];
+              double cell = ActAna_cell[j];
+              double Actana_esum= ActAna_esum[j];
+        double diff = (bb_t - ActAna);
+if(BBHodo_esum>0.002 && Actana_esum>0.004 && bb_t<1000&&ActAna<1000){
+                  h_TOF_AA->Fill(diff);
+    h_TOF_Corr_AA->Fill(cell, diff);}}}
+
+    
+
+//AA with HCal
+     for (int i = 0; i< *ActAna_nhits; i++) {
+             double ActAna = ActAna_t[i];
+              double Actana_esum= ActAna_esum[i];
+	      for (int j = 0; j < *HCal_hit_nhits; j++) {
+            double hcal_t = HCal_t[j];
+  double hcal_esum =HCal_esum[j];
+  double diff = ( ActAna-hcal_t);
+  double cell = HCal_cell[j];
+  if( Actana_esum>0.004 && ActAna<1000 &&hcal_esum>0.008 && hcal_t<1000){
+	  h_TOF_AAHCal->Fill(diff);
+	  h_TOF_Corr_AAHCal->Fill(cell,diff);}}}
+	  
+
+//AA with HoDoPR
+     for (int i = 0; i< *ActAna_nhits; i++) {
+             double ActAna = ActAna_t[i];
+              double Actana_esum= ActAna_esum[i];
+	        double cell = ActAna_cell[i];
+	      for (int j = 0; j < *hodoPR_nhits; j++) {
+    double HodoPR = hodoPR_t[j];
+    double HodoPR_esum= hodoPR_esum[j];
+      double diff = ( HodoPR - ActAna);
+    if (Actana_esum>0.004 && HodoPR_esum>0.003&& HodoPR<1000&&ActAna<1000){
+	    h_TOF_AAHodoPR->Fill(diff);
+	    h_TOF_Corr_AAHodoPR->Fill(cell,diff);}}}
+
 }
 
 
@@ -285,6 +339,40 @@ h_TOF_HodoPR->GetYaxis()->SetTitle("HCal Time - HodoPR Time");
 h_TOF_HodoPR->GetXaxis()->CenterTitle();
 h_TOF_HodoPR->GetYaxis()->CenterTitle();
 h_TOF_HodoPR->Draw("COLZ");
+
+TCanvas *c11 = new TCanvas("c11","AA with BBhodo TOF plot",1200,600);
+c11->Divide(2,1);
+c11->cd(1);
+h_TOF_AA->Draw();
+c11->cd(2);
+h_TOF_Corr_AA->GetXaxis()->SetTitle("AA_Cell");
+h_TOF_Corr_AA->GetYaxis()->SetTitle("BBHodo Time - AA Time");
+h_TOF_Corr_AA->GetXaxis()->CenterTitle();
+h_TOF_Corr_AA->GetYaxis()->CenterTitle();
+h_TOF_Corr_AA->Draw("COLZ");
+
+TCanvas *c10 = new TCanvas("c10","AA with HCal TOF plot",1200,600);
+c10->Divide(2,1);
+c10->cd(1);
+h_TOF_AAHCal->Draw();
+c10->cd(2);
+h_TOF_Corr_AAHCal->GetXaxis()->SetTitle("HCal_Cell");
+h_TOF_Corr_AAHCal->GetYaxis()->SetTitle("AA Time-HCal Time");
+h_TOF_Corr_AAHCal->GetXaxis()->CenterTitle();
+h_TOF_Corr_AAHCal->GetYaxis()->CenterTitle();
+h_TOF_Corr_AAHCal->Draw("COLZ");
+
+
+TCanvas *c2 = new TCanvas("c2","AA with HodoPR TOF plot",1200,600);
+c2->Divide(2,1);
+c2->cd(1);
+h_TOF_AAHodoPR->Draw();
+c2->cd(2);
+h_TOF_Corr_AAHodoPR->GetXaxis()->SetTitle("AA_Cell");
+h_TOF_Corr_AAHodoPR->GetYaxis()->SetTitle("HodoPR Time - AA Time");
+h_TOF_Corr_AAHodoPR->GetXaxis()->CenterTitle();
+h_TOF_Corr_AAHodoPR->GetYaxis()->CenterTitle();
+h_TOF_Corr_AAHodoPR->Draw("COLZ");
 
 
 }

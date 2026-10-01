@@ -118,10 +118,10 @@ TGraph *gr_p12   = new TGraph();
 TGraph *gr_hodo = new TGraph();
 TGraph *gr_ce = new TGraph();
 TGraph *gr_aa   = new TGraph();
-//TGraph *gr_hcal   = new TGraph();
+TGraph *gr_hcal   = new TGraph();
 
 
-int n1=0, nh=0, nce=0,naa=0;
+int n1=0, nh=0, nce=0,naa=0,nhcal=0;
 // ============================
 // Event loop
 // ============================
@@ -132,14 +132,14 @@ while(tree.Next()) {
         double x  = GEMPR_hit_xg[i];
         double z  = GEMPR_hit_zg[i];
 //	if(plane==1){
-            gr_p12->SetPoint(n1++, x, z);
+            gr_p12->SetPoint(n1++, z, x);
     }
     // ---- HODO ----
     for (int i = 0; i < *hodoPR_hit_nhits; i++) {
         double x = hodoPR_hit_xhitg[i];
 	int plane = hodoPR_hit_plane[i];
         double z = hodoPR_hit_zhitg[i];
-        gr_hodo->SetPoint(nh++, x, z);
+        gr_hodo->SetPoint(nh++, z, x);
     }
     // ---- CE GEM ----
     for (int i = 0; i < *CEGEMs_hit_nhits; i++){
@@ -147,7 +147,7 @@ while(tree.Next()) {
         double x  = CEGEMs_hit_xg[i];
         double z  = CEGEMs_hit_zg[i];
 //if(plane==4){
-            gr_ce->SetPoint(nce++, x, z);
+            gr_ce->SetPoint(nce++, z, x);
     }
 
 
@@ -156,16 +156,16 @@ while(tree.Next()) {
         double x  = ActAnScint_hit_xhitg[i];
         double z  = ActAnScint_hit_zhitg[i];
 //if(plane==4){
-            gr_aa->SetPoint(naa++, x, z);
+            gr_aa->SetPoint(naa++, z, x);
     }
-/*
+
 
  for (int i = 0; i < *HCal_hit_nhits; i++){
-        double x  = HCal_hit_zhitg[i];
-        double z  = HCal_hit_yhitg[i];
-            gr_hcal->SetPoint(nhcal++, x, z);
+        double x  = HCal_hit_xhitg[i];
+        double z  = HCal_hit_zhitg[i];
+            gr_hcal->SetPoint(nhcal++, z, x);
     }
-*/
+
 
 }
 
@@ -181,8 +181,8 @@ gr_ce->SetMarkerColor(kMagenta);
 gr_ce->SetMarkerStyle(20);
 gr_aa->SetMarkerColor(kGreen);
 gr_aa->SetMarkerStyle(20);
-//gr_hcal->SetMarkerColor(kBlue+2);
-//gr_hcal->SetMarkerStyle(22);
+gr_hcal->SetMarkerColor(kBlue+2);
+gr_hcal->SetMarkerStyle(22);
 
 
 
@@ -190,8 +190,8 @@ gr_aa->SetMarkerStyle(20);
 // Draw
 // ============================
 TCanvas *c1 = new TCanvas("c1","Xg vs Zg overlay",800,800);
-//TH2F *frame = new TH2F("frame","Xg vs Zg;Xg;Zg",100,-5.5,0.5, 100,3.5,9.5);
-TH2F *frame = new TH2F("frame","Xg vs Zg;Xg;Zg",100,-3.2,-1.2, 100,3.5,5.5);
+TH2F *frame = new TH2F("frame","Zg vs Xg;Zg;Xg",100,3.5,9.5,100,-5.5,0.5); //if i add HCAL
+//TH2F *frame = new TH2F("frame","Zg vs Xg;Zg;Xg",100,3.5,5.5,100,-3.2,-1.2);
 
 
 frame->Draw();
@@ -200,7 +200,7 @@ gr_p12->Draw("P SAME");
 gr_hodo->Draw("P SAME");
 gr_ce->Draw("P SAME");
 gr_aa->Draw("P SAME");
-//gr_hcal->Draw("P SAME");
+gr_hcal->Draw("P SAME");
 
 
 // Legend
@@ -209,7 +209,7 @@ leg->AddEntry(gr_p12,"GEM PR Plane 12","p");
 leg->AddEntry(gr_hodo,"Hodo","p");
 leg->AddEntry(gr_ce,"CE GEMRear Plane ","p");
 leg->AddEntry(gr_aa,"AA","p");
-//leg->AddEntry(gr_hcal,"HCal","p");
+leg->AddEntry(gr_hcal,"HCal","p");
 leg->Draw();
 c1->Update();
 
